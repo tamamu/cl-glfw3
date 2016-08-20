@@ -75,14 +75,18 @@
    swap-buffers
    swap-interval
    extension-supported-p
-   get-proc-address))
+   get-proc-address
+   make-image
+   create-cursor
+   set-cursor
+   destroy-cursor))
 
 ;; internal stuff
 (export
   '(define-glfw-callback))
 
 (define-foreign-library (glfw)
-     (:unix (:or "libglfw.so.3.0" "libglfw.so.3"))
+     (:unix (:or "libglfw.so.3.1" "libglfw.so.3"))
      (t (:or (:default "libglfw3") (:default "libglfw"))))
 
 (use-foreign-library glfw)
@@ -410,8 +414,14 @@ CFFI's defcallback that takes care of GLFW specifics."
   (blue :pointer)
   (size :unsigned-int))
 
+(defcstruct image
+  (width :int)
+  (height :int)
+  (pixels :string))
+
 (defctype window :pointer)
 (defctype monitor :pointer)
+(defctype cursor :pointer)
 
 ;;;; ## GLFW Functions
 (defcfun ("glfwInit" init) :boolean)
@@ -707,3 +717,22 @@ Returns previously set callback."
 
 (defcfun ("glfwGetProcAddress" get-proc-address) :pointer
   (proc-name :string))
+
+;;;; ### Cursor
+
+
+(defcfun ("glfwCreateCursor" create-cursor) cursor
+  (image :pointer) (xhot :int) (yhot :int))
+
+(defun make-image (w h data xh yh)
+  (with-foreign-string (fdata data)
+    (with-foreign-object (ptr '(:struct image))
+      (with-foreign-slots ((width height pixels) ptr (:struct image))
+        (setf width w height h pixels fdata))
+       (create-cursor ptr xh yh))))
+
+(defcfun ("glfwSetCursor" set-cursor) :void
+  (window window) (cursor cursor))
+
+(defcfun ("glfwDestroyCursor" destroy-cursor) :void
+  (cursor cursor))

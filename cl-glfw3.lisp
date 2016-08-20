@@ -427,4 +427,6 @@ SHARED: The window whose context to share resources with."
 (defun swap-buffers (&optional (window *window*))
   (%glfw:swap-buffers window))
 
-(import-export %glfw:swap-interval %glfw:extension-supported-p %glfw:get-proc-address)
+(import-export %glfw:swap-interval %glfw:extension-supported-p %glfw:get-proc-address %glfw:create-cursor %glfw:set-cursor %glfw:destroy-cursor)
+
+
